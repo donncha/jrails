@@ -10,7 +10,7 @@ end
 
 require 'action_dispatch/testing/assertions'
 if Rails::VERSION::STRING < "5.0.0"
-require 'action_dispatch/testing/assertions/selector'
+  require 'action_dispatch/testing/assertions/selector'
 end
 
 #--
@@ -142,11 +142,11 @@ module JRails::SelectorAssertions
         else
           @response.body.gsub pattern do |match|
             html = unescape_rjs match
-          matches ||= []
+            matches ||= []
             matches.concat HTML::Document.new(html).root.children.select{ |n| n.tag? }
-          ""
+            ""
+          end
         end
-    end
     end
 
     if matches
@@ -185,6 +185,7 @@ module JRails::SelectorAssertions
     :insert_html          => "\(jQuery|$\)\\(#{RJS_ANY_ID}\\)\\.append\\(#{RJS_PATTERN_HTML}\\)",
     :replace              => "\(jQuery|$\)\\(#{RJS_ANY_ID}\\)\\.replaceWith\\(#{RJS_PATTERN_HTML}\\)",
     :insert_top           => "\(jQuery|$\)\\(#{RJS_ANY_ID}\\)\\.prepend\\(#{RJS_PATTERN_HTML}\\)",
+    :insert_after         => "\(jQuery|$\)\\(#{RJS_ANY_ID}\\)\\.after\\(#{RJS_PATTERN_HTML}\\)",
     :insert_bottom        => "\(jQuery|$\)\\(#{RJS_ANY_ID}\\)\\.append\\(#{RJS_PATTERN_HTML}\\)",
     :effect               => "\(jQuery|$\)\\(#{RJS_ANY_ID}\\)\\.effect\\(",
     :highlight            => "\(jQuery|$\)\\(#{RJS_ANY_ID}\\)\\.effect\\('highlight'"
@@ -217,25 +218,24 @@ module JRails::SelectorAssertions
 
         root
       else
-      root = HTML::Node.new(nil)
+        root = HTML::Node.new(nil)
 
-      while true
-        next if body.sub!(RJS_STATEMENTS[:any]) do |match|
-          html = unescape_rjs(match)
-          matches = HTML::Document.new(html).root.children.select { |n| n.tag? }
-          root.children.concat matches
-          ""
+        while true
+          next if body.sub!(RJS_STATEMENTS[:any]) do |match|
+            html = unescape_rjs(match)
+            matches = HTML::Document.new(html).root.children.select { |n| n.tag? }
+            root.children.concat matches
+            ""
+          end
+          break
         end
-        break
-      end
 
-      root
+        root
       end
     else
       response_from_page_without_rjs
     end
   end
-  alias_method_chain :response_from_page, :rjs
 
   # Unescapes a RJS string.
   def unescape_rjs(rjs_string)
@@ -253,4 +253,5 @@ end
 
 ActionDispatch::Assertions.module_eval do
   include JRails::SelectorAssertions
+  alias_method_chain :response_from_page, :rjs
 end
