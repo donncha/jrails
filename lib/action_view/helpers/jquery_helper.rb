@@ -511,7 +511,7 @@ module ActionView
           end
         end
 
-        if USE_PROTECTION && respond_to?('protect_against_forgery?') && protect_against_forgery?
+        if USE_PROTECTION && js_options['type'] |= 'get' && respond_to?('protect_against_forgery?') && protect_against_forgery?
           if js_options['data']
             js_options['data'] << " + '&"
           else
